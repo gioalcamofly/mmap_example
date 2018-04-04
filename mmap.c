@@ -9,14 +9,13 @@
 #include <string.h>
 
 
-#define PATH "/home/giovanni/Documentos/Proyectos/DPS/mmap_use/archivo.txt"
-size_t size;
-
+#define PATH "./archivo.txt"
 int main() {
 	struct stat filestat;
 	char *p;
 	int fd;
 	int removed;
+	size_t size;
 
 	fd = open(PATH, O_CREAT | O_RDWR);
 	if (fd == -1) {
@@ -44,10 +43,10 @@ int main() {
 			removed++;
 			continue;
 		}
-		printf("%c", p[i]);
+		printf("%c", p[i - removed]);
 	}
-	size = size - removed * sizeof(char);
-	int new_size = (size * 2) + 1;
+	
+	int new_size = ((size - removed * sizeof(char)) * 2) + 1;
 	if (ftruncate(fd, new_size) == -1) {
 		perror("ftruncate");
 		exit(1);
@@ -58,8 +57,9 @@ int main() {
 		perror("mremap");
 		exit(1);
 	}
+	
 	int j = 0;
-	for (i = size; i < new_size - 1; i++) {
+	for (i = i + 1; i < new_size; i++) {
 		p[i] = toupper(p[j]);
 		printf("%c", p[i]);
 		j++;
